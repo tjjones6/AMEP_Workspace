@@ -54,7 +54,7 @@ article{
     padding: 10px;
 }
 @media screen and (max-width:600px){
-    aside, section, article{
+    aside, section, article, myPDF{
         width: 100%;
     }
 }
