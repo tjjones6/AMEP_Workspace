@@ -72,3 +72,6 @@ table, th, td{
 .button2:hover{
     box-shadow: 0 10px 16px 0 rgba(44, 44, 44, 0.2), 0 6px 20px 0 rgba(56, 56, 56, 0.19);
 }
+.button3:hover{
+    box-shadow: 0 10px 16px 0 rgba(255, 0, 0, 0.2), 0 6px 20px 0 rgba(255, 0, 0, 0.2);
+}
