@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Index Notation</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+</head>
+
+<!-- Styling Standards (Make a CSS file if this gets too long) -->
+<style>
+  body {
+    background-color: #f5f5f5;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+
+  header {
+    background-color: black;
+    color: white;
+    text-align: center;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 200%;
+    width: 100%;
+    padding: 2%;
+    border-radius: 10px;
+  }
+
+  p, li {
+    font-size: 18px;
+    line-height: 1.5;
+    color: #333;
+  }
+
+  h2 {
+    font-family: 'Times New Roman', Times, serif;
+    text-decoration: underline;
+  }
+
+  img, video {
+    border-radius: 25px;
+    max-width: 100%;
+    height: auto;
+  }
+
+</style>
+
+<header style="margin-top: 2%;">
+  Cartesian Index Notation for Tensor Calculations
+</header>
+
+<body style="width: 100%; margin-left: 12.5%; margin-right: 12.5%; width: 75%;">
+  <!--
+  <header style="background-color: black;color: white;text-align: center;font-size: 150%;
+  border-top-left-radius: 15px;border-top-right-radius: 15px;">
+  The Double Pendulum Fractal
+  </header>
+  -->
+  <!--<p>Math can be inline like \(2^{2x}=4\), or displayed like:</p>
+  \[2^{3x}=8\]-->
+  <p style="font-size: large; text-align: center;margin-bottom: 0;">
+    Tyler Jones
+  </p>
+  <p style="font-size: large; text-align: center;margin: 0;">
+    University of Wisconsin-Madison
+  </p>
+
+  <h1 style="text-align: center; color: red;">
+    IN PROGRESS
+  </h1>
+  
+  <h2 style="text-decoration: underline;"> Introduction/Motivation </h2>
+  <p style="text-indent: 30px;">
+    Complex tensor operations have frequently appeared throughout various undergraduate classes (Math 321: Applied Mathematical Analysis 1,
+    Physics 311: Classical Mechanics, Physics 322: Electromagnetic Fields, ME 363/573: Fluid and Computational
+    Fluid Dynamics, EMA 521: Aerodynamics). Index notation (Einstein notation, Cartesian notation, etc.) is a tool 
+    for manipulating these equations into general arrays (tensors) via subscripts and a few unique symbols to simplify
+    these operations and greatly reduce the complexity. 
+  </p>
+
+  <!-- Key Words -->
+    <li>Scalar: A magnitude that does not change with a rotation of axes - <i>A special tensor of order zero</i></li>
+    <li>Vector: Associates a scalar with a direciton - <i>A special tensor of order one</i></li>
+    <li>Tensor: Associates a vector (or tensor) with a direction - <i>A matrix is a special tensor of order two</i></li>
+
+
+    <!-- Kronecker Delta -->
+  <h2 style="text-decoration: underline;"> Kronecker Delta Symbol: \(\delta_{ij} \) </h2>
+  <p style="text-indent: 30px;">
+    The Kronecker delta is a rank-2 symmetric tensor representing the dot product and is defined as follows:
+    </p>
+    <p style="text-indent: 30px;">
+    $$\delta_{ij} = 
+    \begin{cases} 
+      1 & \text{if } i = j \\ 
+      0 & \text{if } i \neq j 
+    \end{cases}$$
+    </p>
+    <p style="text-indent: 30px;">
+    Alternatively, in matrix form:
+    </p>
+    <p style="text-indent: 30px;">
+    $$\delta_{ij} = 
+    \begin{pmatrix} 
+      1 & 0 & 0 \\ 
+      0 & 1 & 0 \\ 
+      0 & 0 & 1 
+    \end{pmatrix}$$
+    </p>
+
+
+    <!-- Levi-Civita -->
+    <h2 style="text-decoration: underline;"> Levi-Civita Symbol: \(\epsilon_{ijk} \) </h2>
+    <p style="text-indent: 30px;">
+        The alternating (or permutation) tensor is a rank-3 antisymmetric tensor representing the cross cross-product and is defined as follows:
+    </p>
+    <p style="text-indent: 30px;">
+        $$\epsilon_{ijk} = 
+        \begin{cases} 
+          1 & \text{if  (ijk) is an even (cyclic) permutation of (1,2,3)},\\ 
+          -1 & \text{if (ijk) is an odd (acyclic) permutation of (1,2,3)},\\
+          0 & \text{otherwise}
+        \end{cases}$$
+        We can say that an <i>even</i> permutation is the same as a <i>cyclic</i> permutation. Likewise,
+        we can say that an <i>odd</i> permutation is the same as an <i>acyclic</i> permuation. Symbolic 
+        representations of cylic and acyclic rotations are as follows respectively:
+        $$
+        \epsilon_{123} = \epsilon_{231} = \epsilon_{312} = 1
+        $$
+        $$
+        \epsilon_{213} = \epsilon_{132} = \epsilon_{321} = -1
+        $$
+        The \( \epsilon_{ijk} \) symbol provides us with a compact expression for the components of the cross-product 
+        of the right-handed Cartesian basis:
+        $$
+        \boxed{(\mathbf{e}_i \times \mathbf{e}_j) \cdot \mathbf{e}_k = \epsilon_{ijk}}
+        $$
+        Similarly, we can also write the following since this is the k-component of \( (\mathbf{e}_i \times \mathbf{e}_j) \)
+        $$
+        \boxed{(\mathbf{e}_i \times \mathbf{e}_j) = \sum_{k=1}^3 \epsilon_{ijk} \mathbf{e}_k}
+        $$        
+
+    </p>
+    <div style="text-align: center;">
+        <img src="CyclicPerm.PNG" style="width: 30%;">
+    </div>
+
+
+    <!-- Sigma Notation, Free, and Dummy Indicies -->
+    <h2 style="text-decoration: underline;"> Sigma Notation, Free, and Dummy Indicies </h2>
+    <p style="text-indent: 30px;">
+        The expansion of vectors \(\mathbf{a}\) and \(\mathbf{b}\) in terms of the basis vectors \(\mathbf{e_1}\), \(\mathbf{e_2}\), \(\mathbf{e_3}\) is typically 
+        written as: \( \mathbf{a} = a_1\mathbf{e_1} + a_2\mathbf{e_2} + a_3\mathbf{e_3} \) and \(\mathbf{b} = b_1\mathbf{e_1} + b_2\mathbf{e_2} + b_3\mathbf{e_3} \).
+        This can be compactly written using sigma notation. For example:
+        $$
+        \mathbf{a} =  \sum_{i=1}^3a_i\mathbf{e}_i, \hspace*{20pt} \mathbf{b} =  \sum_{i=1}^3b_i\mathbf{e}_i
+        $$
+        To perform basic vector operations, the Kronecker delta and Levi-Civita symbols will be employed for compactness. Note that 
+        these are only valid when the basis is <i> orthonormal </i> and <i>right-handed</i>. For example:
+        $$
+        \mathbf{a} \cdot \mathbf{b} = \sum_{i=1}^3\sum_{j=1}^3a_ib_j\mathbf{e}_i\cdot\mathbf{e}_j = \sum_{i=1}^3\sum_{j=1}^3a_ib_j\delta_{ij} = \sum_{i=1}^3a_ib_i
+        $$
+        $$
+        \mathbf{a} \times \mathbf{b} = \sum_{i=1}^3\sum_{j=1}^3a_ib_j\mathbf{e}_i\times\mathbf{e}_j = \sum_{i=1}^3\sum_{j=1}^3\sum_{k=1}^3a_ib_j\epsilon_{ijk}\mathbf{e}_k
+        $$
+        In the sums above, i and j are <i>dummy/summation</i> indicies which means they do not have a designated value; in fact, they have all values in their range (typically 1,2,3). 
+        We call them dummy indicies because it is their <i>place</i> and <i>range</i> that matter in the expression, NOT their assigned name.
+        $$
+        \mathbf{a} = \sum_{i=1}^3a_i\mathbf{e}_i = \sum_{j=1}^3a_j\mathbf{e}_j = \sum_{k=1}^3a_k\mathbf{e}_k \neq \sum_{k=1}^3a_k\mathbf{e}_i
+        $$
+        Here is an example of how indicies come in two kinds, <i>dummies</i> and <i> free</i>.
+        $$
+        \mathbf{e}_i\cdot(\mathbf{a}\cdot\mathbf{b})\mathbf{c} = \Bigg(\sum_{j=1}^3a_jb_j\Bigg)c_i
+        $$
+        In the above expression, the index <i>i</i> is free which means we can pick it for any value 1,2,3. Note that since we chose <i>i</i> to be the free index on the left-hand 
+        side of the equaiton, we must continue to use index <i>i</i> for \( c_i\) on the right-hand side. That leaves <i>j</i>, our dummy index, which is the index we are summing over.
+    </p>
+
+
+    <!-- Einstein Summation Convention -->
+    <h2 style="text-decoration: underline;"> Einstein Summation Convention </h2>
+    <p style="text-indent: 30px;">
+        To reduce the amount of times we are writing out large sums, we will drop the \(\sum \) signs and adopt Einstein's summation convention which means that 
+        a repeated index implicitly denotes a sum over all values of that index. 
+        $$
+        \mathbf{a} = a_1\mathbf{e}_1 + a_2\mathbf{e}_2 + a_3\mathbf{e}_3 \equiv a_i\mathbf{e}_i
+        $$
+        $$ \mathbf{a\cdot b} = a_ib_i $$
+        $$ \mathbf{a\times b} = \epsilon_{ijk}a_ib_j\mathbf{e}_k $$
+    </p>
+    <!-- Dummy Repitition Rule -->
+    <p style="text-indent: 30px;">
+        <i>Dummy Repitition Rule: </i> Indicies can never appear more than twice in the same term, and if they are, it is probably by mistake. Also, note that 
+        free indicies in different terms must match. Looking at the dot product again in index notation, the dummies must match as we can see.
+        $$
+        \mathbf{a\cdot b} = (a_i\mathbf{e}_i) \cdot (b_j\mathbf{e}_j) = a_ib_j\mathbf{e}_i\cdot\mathbf{e}_j = a_ib_j\delta_{ij} = a_ib_i = a_jb_j
+        $$
+    </p>
+    <!-- Substitution Rule -->
+    <p style="text-indent: 30px;">
+        <i>Substitution Rule: </i> If one of the indicies of \( \delta_{ij}\) is involved in a sum, we Substitute the summation index for the other index in \( \delta_{ij}\) 
+        and drop \( \delta_{ij}\), for example:
+        $$
+        a_i\delta_{ij} \equiv a_1\delta_{1j} + a_2\delta_{2j} + a_3\delta_{3j} = a_j
+        $$
+        If both indicies of \( \delta_{ij} \) are summed over as in the double sum \( a_ib_j\delta_{ij} \), it does not matter which index is being substituted, thus 
+        $$ a_ib_j\delta_{ij} = a_ib_i = a_jb_j $$
+        and likewise 
+        $$ \delta_{kl}\delta_{kl} = \delta_{kk} = \delta_{ll} = 3, \hspace*{20pt} \delta_{ij}\epsilon_{ijk} = \epsilon_{iik} = \epsilon_{jjk} = 0 $$
+        The results above are clearly true, but here is the noncompact form for validation: \( \delta_{kk} \equiv \delta_{11} + \delta_{22} + \delta_{33} = 1+1+1=3 \). 
+        As for the result of \( \epsilon_{ijk} \), the expression vanishes because two indicies have the same value. Remember that the cross-product measures how normal 
+        two vectors are. Since the resultant vector's magnitude corresponds to the area of the parallelogram formed by the two original vectors, it should make sense 
+        that two parallel vectors forms zero area. A useful identity that appears frequently in tensor calculus is \(\epsilon_{ijk}\epsilon_{klm}  \). An excellent result 
+        (worth remembering) can be deduced as follows:
+
+        $$
+        \begin{aligned}
+        \epsilon_{ijk}\epsilon_{klm} &= \epsilon_{kij}\epsilon_{klm} = 
+        \begin{vmatrix}
+          \delta_{kk} & \delta_{kl} & \delta_{km} \\
+          \delta_{ik} & \delta_{il} & \delta_{im} \\
+          \delta_{jk} & \delta_{jl} & \delta_{jm} \\
+        \end{vmatrix} \\
+        &= \delta_{kk}(\delta_{il}\delta_{jm} - \delta_{im}\delta_{jl}) - \delta_{kl}(\delta_{ik}\delta_{jm} - \delta_{im}\delta_{jk}) + \delta_{km}(\delta_{ik}\delta_{jl} - \delta_{il}\delta_{jk}) \\
+        &= \delta_{kk}(\delta_{il}\delta_{jm} - \delta_{im}\delta_{jl}) = \delta_{il}\delta_{jm} - \delta_{im}\delta_{jl}
+        \end{aligned}
+        $$
+
+        $$
+        \boxed{\epsilon_{ijk}\epsilon_{klm} = \epsilon_{k\textcolor{blue}i\textcolor{red}j}\epsilon_{k\textcolor{green}l\textcolor{purple}m} =
+         \delta_{\textcolor{blue}i\textcolor{green}l}\delta_{\textcolor{red}j\textcolor{purple}m} - \delta_{\textcolor{blue}i\textcolor{purple}m}\delta_{\textcolor{red}j\textcolor{green}l}}
+        $$
+        
+        
+        Here are some examples of what has been covered thus far:
+
+        <!-- Examples -->
+        $$
+        \begin{aligned}
+            \textcolor{blue}{\mathbf{e}_l\cdot(\mathbf{a\times b})} &= \epsilon_{ijk}a_ib_j\mathbf{e}_k\cdot\mathbf{e}_l = \epsilon_{ijk}a_ib_j\delta_{kl} \\
+            &= \epsilon_{ijl}a_ib_j = \textcolor{blue}{\boxed{\epsilon_{lmn}a_mb_n}} \\
+        \end{aligned}
+        $$
+        
+        $$
+        \begin{aligned}
+          \textcolor{blue}{(\mathbf{a\times b})\times\mathbf{c}} &= \epsilon_{ijk}\epsilon_{klm}a_ib_jc_l \\
+          &= \epsilon_{kij}\epsilon_{klm}a_ib_jc_l = (\delta_{il}\delta_{jm} - \delta_{im}\delta_{jl})a_ib_jc_l \\
+          &= \delta_{il}\delta_{jm}a_ib_jc_l - \delta_{im}\delta_{jl}a_ib_jc_l = \textcolor{blue}{\boxed{a_ic_ib_m - a_mb_ic_i}}
+        \end{aligned}
+        $$
+    </p>
+
+
+
+</body>
+
+
+</html>
