@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damped Harmonic Oscillator</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+</head>
+
+<style>
+    body {
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+  
+    header {
+      background-color: black;
+      color: white;
+      text-align: center;
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 200%;
+      width: 100%;
+      padding: 2%;
+      border-radius: 10px;
+    }
+  
+    p, li {
+      font-size: 18px;
+      line-height: 1.5;
+      color: #333;
+    }
+  
+    h2 {
+      font-family: 'Times New Roman', Times, serif;
+      text-decoration: underline;
+    }
+  
+    img, video {
+      border-radius: 25px;
+      max-width: 100%;
+      height: auto;
+    }
+
+    button {
+        background-color: rgb(65, 115, 253); /* Green background */
+        border: none; /* No border */
+        color: white; /* White text */
+        padding: 15px 32px; /* Some padding */
+        text-align: center; /* Centered text */
+        text-decoration: none; /* No underline */
+        display: inline-block; /* Inline-block for layout control */
+        font-size: 16px; /* Text size */
+        margin: 4px 2px; /* Some margin */
+        cursor: pointer; /* Pointer cursor on hover */
+        border-radius: 12px; /* Rounded corners */
+    }
+
+    /* Optional: Style the button when hovered */
+    button:hover {
+        background-color: blue;
+    }
+  
+  </style>
+  
+  <header style="margin-top: 2%;">
+    Damped Harmonic Oscillator
+  </header>
+
+<body style="width: 100%; margin-left: 12.5%; margin-right: 12.5%; width: 75%;">
+    <p style="font-size: large; text-align: center;margin-bottom: 0;">
+        Tyler Jones
+      </p>
+      <p style="font-size: large; text-align: center;margin: 0;">
+        University of Wisconsin-Madison
+      </p>
+
+      <div style="text-align: center;">
+        <img src="dampedOscillator.PNG" style="width: 200px;">
+    </div>
+
+      $$ \frac{d^2 x}{dt^2} + \beta \frac{dx}{dt} + \omega x = 0 $$
+
+
+<!-- Input fields for beta and omega0 -->
+<div>
+    <label for="beta">Enter damping coefficient ( \(\beta\) ):</label>
+    <input type="text" id="beta" value="0">
+</div>
+<div>
+    <label for="omega0">Enter natural frequency ( \(\omega\) ):</label>
+    <input type="text" id="omega0" value="1.0">
+</div>
+
+<button onclick="runSimulation()">Run Simulation</button>
+
+<div id="plot" style="width: 100%; margin-top: 2%;"></div>
+<div id="phasePlot" style="width: 100%; margin-top: 2%;"></div>
+
+<script>
+    // Function to run the simulation when the button is clicked
+    function runSimulation() {
+        // Get user input values from the text boxes
+        const beta = parseFloat(document.getElementById('beta').value);
+        const omega0 = parseFloat(document.getElementById('omega0').value);
+
+        // Check if inputs are valid numbers
+        if (isNaN(beta) || isNaN(omega0)) {
+            alert("Please enter valid numbers for beta and omega.");
+            return;
+        }
+
+        // RK4 method for solving a system of ODEs
+        function rk4Step(f, y, t, h) {
+            let k1 = f(t, y);
+            let k2 = f(t + 0.5 * h, y.map((yi, i) => yi + 0.5 * h * k1[i]));
+            let k3 = f(t + 0.5 * h, y.map((yi, i) => yi + 0.5 * h * k2[i]));
+            let k4 = f(t + h, y.map((yi, i) => yi + h * k3[i]));
+            
+            return y.map((yi, i) => yi + (h / 6) * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]));
+        }
+
+        // Define the system of ODEs for the damped harmonic oscillator
+        function dampedOscillator(t, [x, v]) {
+            // dx/dt = v, dv/dt = -2*beta*v - omega0^2 * x
+            return [v, -2 * beta * v - omega0 * omega0 * x];
+        }
+
+        // Initial conditions
+        let x0 = 1.0;  // Initial displacement
+        let v0 = 0.0;  // Initial velocity
+        let y = [x0, v0];
+        let t = 0;
+        let h = 0.01;  // Time step
+        let tMax = 20;  // Maximum time
+        let numSteps = Math.floor(tMax/h);
+
+        // Arrays to store time, displacement, and velocity for plotting
+        let tValues = [];
+        let xValues = [];
+        let vValues = [];
+
+        // Solve the system using RK4
+        for (let i = 0; i < numSteps; i++) {
+            tValues.push(t);
+            xValues.push(y[0]);  // Store the displacement (x)
+            vValues.push(y[1]);  // Store the velocity (v)
+            
+            // Take an RK4 step
+            y = rk4Step(dampedOscillator, y, t, h);
+            
+            // Update time
+            t += h;
+        }
+
+        // Plot the displacement over time using Plotly
+        const plotData = {
+            x: tValues,
+            y: xValues,
+            mode: 'lines',
+            line: { color: 'blue' },
+            type: 'scatter'
+        };
+
+        const layout = {
+            title: 'Damped Harmonic Oscillator - Displacement Time Series',
+            xaxis: { title: 'Time (t)' },
+            yaxis: { title: 'Displacement (x)' },
+        };
+
+        Plotly.newPlot('plot', [plotData], layout);
+
+        // Plot the phase diagram (velocity vs displacement) using Plotly
+        const phaseData = {
+            x: xValues,
+            y: vValues,
+            mode: 'lines',
+            line: { color: 'red' },
+            type: 'scatter'
+        };
+
+        const phaseLayout = {
+            title: 'Phase Space',
+            xaxis: { title: 'Displacement (x)' },
+            yaxis: { title: 'Velocity (v)' },
+        };
+
+        Plotly.newPlot('phasePlot', [phaseData], phaseLayout);
+    }
+</script>
+
+</body>
+</html>
