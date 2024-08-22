@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Driven Duffing Oscillator Solver</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        h3 {
+            margin: 0;
+        }
+
+        .input-container {
+            width: 80%;
+            max-width: 600px;
+            margin: 20px;
+        }
+
+        .plot-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        .slider-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .slider-container span {
+            display: block;
+            text-align: center;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Driven Duffing Oscillator Solver</h1>
+    <h3>Tyler Jones</h3>
+    <h3>University of Wisconsin-Madison</h3>
+
+    <div class="input-container">
+        <form id="duffingForm">
+            <div class="form-group">
+                <label for="alpha">α (Coefficient of linear damping):</label>
+                <input type="number" id="alpha" step="0.01" value="-1">
+            </div>
+            <div class="form-group">
+                <label for="beta">β (Coefficient of cubic damping):</label>
+                <input type="number" id="beta" step="0.01" value="0.25">
+            </div>
+            <div class="form-group">
+                <label for="gamma">γ (Amplitude of external driving force):</label>
+                <input type="number" id="gamma" step="0.01" value="2.5">
+            </div>
+            <div class="form-group">
+                <label for="omega">ω (Angular frequency of external driving force):</label>
+                <input type="number" id="omega" step="0.01" value="2">
+            </div>
+            <div class="form-group">
+                <label for="delta">δ (Coefficient of velocity damping):</label>
+                <input type="number" id="delta" step="0.01" value="0.1">
+            </div>
+            <div class="form-group">
+                <label for="x0">Initial x (Displacement):</label>
+                <input type="number" id="x0" step="0.01" value="0">
+            </div>
+            <div class="form-group">
+                <label for="v0">Initial v (Velocity):</label>
+                <input type="number" id="v0" step="0.01" value="0">
+            </div>
+            <div class="form-group">
+                <label for="timeSpan">Time Span:</label>
+                <input type="number" id="timeSpan" step="0.1" value="50">
+            </div>
+            <div class="form-group">
+                <label for="timeStep">Time Step:</label>
+                <input type="number" id="timeStep" step="0.01" value="0.01">
+            </div>
+            <button type="button" onclick="solveDuffing()">Run Solver</button>
+        </form>
+    </div>
+
+    <div class="plot-container">
+        <div id="xPlot" style="width: 100%; height: 400px;"></div>
+        <div id="vPlot" style="width: 100%; height: 400px;"></div>
+        <div id="phasePlot" style="width: 100%; height: 400px;"></div>
+        <div id="poincarePlot" style="width: 100%; height: 400px;"></div>
+        <div class="slider-container">
+            <label for="phiSlider">Poincaré Section (φ):</label>
+            <input type="range" id="phiSlider" min="0" max="6.2832" step="0.01" value="0">
+            <span id="phiValueDisplay">0</span>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('phiSlider').addEventListener('input', function () {
+            const phiValue = parseFloat(this.value);
+            document.getElementById('phiValueDisplay').innerText = phiValue.toFixed(2);
+            solveDuffing();
+        });
+
+        function solveDuffing() {
+            const alpha = parseFloat(document.getElementById('alpha').value);
+            const beta = parseFloat(document.getElementById('beta').value);
+            const gamma = parseFloat(document.getElementById('gamma').value);
+            const omega = parseFloat(document.getElementById('omega').value);
+            const delta = parseFloat(document.getElementById('delta').value);
+            const timeSpan = parseFloat(document.getElementById('timeSpan').value);
+            const timeStep = parseFloat(document.getElementById('timeStep').value);
+            const x0 = parseFloat(document.getElementById('x0').value);
+            const v0 = parseFloat(document.getElementById('v0').value);
+            const phiValue = parseFloat(document.getElementById('phiSlider').value);
+
+            let t = 0;
+            let x = x0;
+            let v = v0;
+            let phi = 0;
+
+            const timeArray = [];
+            const xArray = [];
+            const vArray = [];
+            const poincareX = [];
+            const poincareV = [];
+
+            function checkIVT(previousValue, currentValue) {
+                return previousValue * currentValue < 0;
+            }
+
+            function rk4_step(x, v, phi, t, dt) {
+                function dxdt(v) {
+                    return v;
+                }
+
+                function dvdt(x, v, phi) {
+                    return gamma * Math.cos(phi) - delta * v - alpha * x - beta * Math.pow(x, 3);
+                }
+
+                function dphidt(omega) {
+                    return omega;
+                }
+
+                const k1x = dt * dxdt(v);
+                const k1v = dt * dvdt(x, v, phi);
+                const k1phi = dt * dphidt(omega);
+
+                const k2x = dt * dxdt(v + 0.5 * k1v);
+                const k2v = dt * dvdt(x + 0.5 * k1x, v + 0.5 * k1v, phi + 0.5 * k1phi);
+                const k2phi = dt * dphidt(omega);
+
+                const k3x = dt * dxdt(v + 0.5 * k2v);
+                const k3v = dt * dvdt(x + 0.5 * k2x, v + 0.5 * k2v, phi + 0.5 * k2phi);
+                const k3phi = dt * dphidt(omega);
+
+                const k4x = dt * dxdt(v + k3v);
+                const k4v = dt * dvdt(x + k3x, v + k3v, phi + k3phi);
+                const k4phi = dt * dphidt(omega);
+
+                x += (k1x + 2 * k2x + 2 * k3x + k4x) / 6;
+                v += (k1v + 2 * k2v + 2 * k3v + k4v) / 6;
+                phi += (k1phi + 2 * k2phi + 2 * k3phi + k4phi) / 6;
+
+                phi = phi % (2 * Math.PI);
+                if (phi < 0) phi += 2 * Math.PI;
+
+                return { x, v, phi };
+            }
+
+            let previousX = x0;
+            let previousV = v0;
+
+            while (t <= timeSpan) {
+                timeArray.push(t);
+                xArray.push(x);
+                vArray.push(v);
+
+                if (checkIVT(previousX, x)) {
+                    console.log(`Zero-crossing detected in x at t=${t}`);
+                }
+                if (checkIVT(previousV, v)) {
+                    console.log(`Zero-crossing detected in v at t=${t}`);
+                }
+
+                if (Math.abs(phi - phiValue) < 1e-2) {
+                    poincareX.push(x);
+                    poincareV.push(v);
+                }
+
+                previousX = x;
+                previousV = v;
+
+                const { x: newX, v: newV, phi: newPhi } = rk4_step(x, v, phi, t, timeStep);
+                x = newX;
+                v = newV;
+                phi = newPhi;
+                t += timeStep;
+            }
+
+            const trace1 = {
+                x: timeArray,
+                y: xArray,
+                mode: 'lines',
+                name: 'x(t)',
+            };
+
+            const trace2 = {
+                x: timeArray,
+                y: vArray,
+                mode: 'lines',
+                name: 'v(t)',
+            };
+
+            const trace3 = {
+                x: xArray,
+                y: vArray,
+                mode: 'markers',
+                name: 'Phase Space (x vs v)',
+                marker: {
+                    size: 4, // Set the marker size here
+                    opacity: 0.5 // Optional: Set marker opacity
+                }
+            };
+
+            const trace4 = {
+                x: poincareX,
+                y: poincareV,
+                mode: 'markers',
+                name: `Poincaré Section φ = ${phiValue.toFixed(2)}`,
+            };
+
+            const layout4 = {
+                title: `Poincaré Section (φ = ${phiValue.toFixed(2)})`,
+                xaxis: {
+                    title: 'Displacement (x)',
+                    range: [Math.min(...poincareX) - 1, Math.max(...poincareX) + 1] // Adjust range as needed
+                },
+                yaxis: {
+                    title: 'Velocity (v)',
+                    range: [Math.min(...poincareV) - 1, Math.max(...poincareV) + 1] // Adjust range as needed
+                },
+            };
+
+            Plotly.newPlot('xPlot', [trace1], { title: 'Displacement vs Time' });
+            Plotly.newPlot('vPlot', [trace2], { title: 'Velocity vs Time' });
+            Plotly.newPlot('phasePlot', [trace3], { title: 'Phase Space (x vs v)' });
+            Plotly.newPlot('poincarePlot', [trace4], layout4);
+        }
+
+        // Initial plot
+        solveDuffing();
+    </script>
+</body>
+
+</html>
