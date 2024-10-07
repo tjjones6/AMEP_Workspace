@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heat Equation Solver</title>
+    <script src="https://cdn.jsdelivr.net/npm/mathjs/lib/browser/math.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css"
+        integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"
+        integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz"
+        crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"
+        integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        input {
+            margin: 5px;
+        }
+
+        #plots {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .plot {
+            width: 80%;
+            min-width: 300px;
+        }
+
+        .input-container {
+            width: 80%;
+            max-width: 800px;
+            margin: 20px;
+        }
+
+        button {
+            background-color: rgb(65, 115, 253);
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 12px;
+        }
+
+        button:hover {
+            background-color: blue;
+        }
+
+        canvas {
+            border: 1px solid #ccc;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Heat Equation Solver \( U(x,t) \in \R^1 \)</h1>
+    <div>
+        <label for="x_min">Left Boundary ( \(x_{min} \)):</label>
+        <input type="number" id="x_min" value="-1"><br>
+
+        <label for="x_max">Right Boundary ( \(x_{max} \)):</label>
+        <input type="number" id="x_max" value="1"><br>
+
+        <label for="Nx">Number of Spatial Points ( \(N_x \)):</label>
+        <input type="number" id="Nx" value="100"><br>
+
+        <label for="T_FINAL">Final Time ( \(t_{final} \)):</label>
+        <input type="number" id="T_FINAL" value="1"><br>
+
+        <label for="dt">Time Step (\(dt \)):</label>
+        <input type="number" id="dt" value="0.0001"><br>
+
+        <label for="initial_condition">Initial Data (e.g., \(U(x,0) = x^2 \)):</label>
+        <input type="text" id="initial_condition" value="x^2"><br>
+
+        <button id="runButton">Run Simulation</button>
+    </div>
+
+    <div id="plots">
+        <div id="heatmap" class="plot"></div>
+        <div id="surfacePlot" class="plot"></div>
+    </div>
+
+    <canvas id="evolutionCanvas" width="500" height="300"></canvas>
+
+    <script>
+        document.getElementById("runButton").onclick = function() {
+            // Get user inputs
+            const x_min = parseFloat(document.getElementById("x_min").value);
+            const x_max = parseFloat(document.getElementById("x_max").value);
+            const Nx = parseInt(document.getElementById("Nx").value);
+            const T_FINAL = parseFloat(document.getElementById("T_FINAL").value);
+            const dt = parseFloat(document.getElementById("dt").value);
+            const dx = (x_max - x_min) / (Nx - 1);
+            const initialCondition = document.getElementById("initial_condition").value;
+
+            // Stability condition
+            const alpha = dt / (dx ** 2);
+            if (alpha >= 0.5) {
+                alert("Warning: Stability condition not satisfied (alpha should be < 0.5)");
+            }
+
+            // Create the x array
+            const x = Array.from({length: Nx}, (_, i) => x_min + i * dx);
+
+            // Evaluate the initial condition using math.js
+            let u;
+            try {
+                u = x.map(val => math.evaluate(initialCondition, { x: val }));
+            } catch (error) {
+                alert("Error evaluating initial condition: " + error.message);
+                return;
+            }
+
+            const Nt = Math.floor(T_FINAL / dt);
+            let u_sol = Array.from({length: Nt}, () => new Array(Nx).fill(0));
+            u_sol[0] = u;
+
+            // Time-stepping loop
+            for (let t = 1; t < Nt; t++) {
+                let u_new = [...u];
+                for (let i = 1; i < Nx - 1; i++) {
+                    u_new[i] = u[i] + alpha * (u[i - 1] - 2 * u[i] + u[i + 1]);
+                }
+                // Boundary Conditions: Dirichlet u(x,t) = 0 on boundary
+                u_new[0] = 0;
+                u_new[Nx - 1] = 0;
+                u = u_new;
+                u_sol[t] = u;
+            }
+
+            // Create time vector for plotting
+            const time = Array.from({length: Nt}, (_, t) => t * dt);
+
+            // Create a 2D heatmap
+            const heatmapData = [{
+                z: u_sol,
+                x: x,
+                y: time,
+                type: 'heatmap',
+                colorscale: 'YlOrRd',
+                colorbar: {
+                    title: 'Temperature',
+                }
+            }];
+
+            const heatmapLayout = {
+                title: 'Heatmap of Heat Equation Solution',
+                xaxis: {title: 'Space [x]'},
+                yaxis: {title: 'Time [t]'},
+                autosize: true,
+            };
+
+            Plotly.newPlot('heatmap', heatmapData, heatmapLayout);
+
+            // Create a 3D surface plot
+            const surfaceData = [{
+                z: u_sol,
+                x: x,
+                y: time,
+                type: 'surface',
+                colorscale: 'YlOrRd',
+                colorbar: {
+                    title: 'Temperature',
+                }
+            }];
+
+            const surfaceLayout = {
+                title: '3D Surface Plot of Heat Equation Solution',
+                scene: {
+                    xaxis: {title: 'Space [x]'},
+                    yaxis: {title: 'Time [t]'},
+                    zaxis: {title: 'Temperature [u]'},
+                },
+                autosize: true,
+            };
+
+            Plotly.newPlot('surfacePlot', surfaceData, surfaceLayout);
+
+            // Set up canvas for 2D plot evolution
+            const canvas = document.getElementById('evolutionCanvas');
+            const ctx = canvas.getContext('2d');
+            let currentTime = 0;
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+                const index = Math.floor(currentTime / dt);
+                const u_current = u_sol[index] || u_sol[Nt - 1]; // Last frame if index out of bounds
+                const x_scaled = x.map(val => (val - x_min) / (x_max - x_min) * canvas.width);
+                const u_scaled = u_current.map(val => canvas.height - (val * canvas.height / Math.max(...u_current)));
+
+                // Draw the line
+                ctx.beginPath();
+                ctx.moveTo(x_scaled[0], u_scaled[0]);
+                for (let i = 1; i < Nx; i++) {
+                    ctx.lineTo(x_scaled[i], u_scaled[i]);
+                }
+                ctx.strokeStyle = 'blue';
+                ctx.stroke();
+
+                // Update the time
+                currentTime += dt;
+                if (currentTime < T_FINAL) {
+                    requestAnimationFrame(draw);
+                }
+            }
+
+            draw();
+        };
+    </script>
+</body>
+</html>
